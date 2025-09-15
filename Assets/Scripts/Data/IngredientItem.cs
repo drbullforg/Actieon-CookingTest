@@ -29,4 +29,8 @@ public class IngredientItem : MonoBehaviour
         }
         nameText.text = inventory + "/" + amount;
     }
+
+    public void GoQuickShop() {
+        GameSystemManager.instance.GetQuickShop(ingredientData);
+    }
 }

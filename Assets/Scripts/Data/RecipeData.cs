@@ -16,6 +16,7 @@ public class RecipeData: ScriptableObject
     public Sprite recipeIcon;
     public RecipeRarity recipeRarity;
     public int cookingTime;
+    public int energyCost;
     public List<IngredientAmount> ingredientRequirement;
 }
 

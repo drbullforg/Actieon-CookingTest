@@ -16,6 +16,7 @@ MonoBehaviour:
   recipeIcon: {fileID: 21300000, guid: 8bf10a60fa4039e4a86bb0ecaab5ac6c, type: 3}
   recipeRarity: 2
   cookingTime: 10
+  energyCost: 10
   ingredientRequirement:
   - ingredient: {fileID: 11400000, guid: 5cd223437281df249906bab9f680ca6e, type: 2}
     amount: 2

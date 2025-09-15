@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerManager: MonoBehaviour
 {
@@ -10,10 +12,12 @@ public class PlayerManager: MonoBehaviour
     public int money;
     public int energy;
     public int maxEnergy = 20;
+    public Slider energyBar;
+    public TextMeshProUGUI energyText;
 
     [Header("Energy Regen")]
     public int regenAmount = 1;
-    public int regenIntervalMinutes = 5;
+    public int regenIntervalSeconds = 5;
     private DateTime lastRegenTime;
 
     [Header("Inventory")]
@@ -36,7 +40,7 @@ public class PlayerManager: MonoBehaviour
 
     private void Start() {
         LoadPlayerData();
-        InvokeRepeating(nameof(CheckEnergyRegen), 1f, 60f); // เช็คทุกๆ 1 นาที
+        InvokeRepeating(nameof(CheckEnergyRegen), 1f, 5f);
 
         PrintInventory();
     }
@@ -46,11 +50,14 @@ public class PlayerManager: MonoBehaviour
         if (!inventory.ContainsKey(name))
             inventory[name] = 0;
         inventory[name] += amount;
+
+        SavePlayerData();
     }
 
     public bool UseItem(string name, int amount) {
         if (inventory.ContainsKey(name) && inventory[name] >= amount) {
             inventory[name] -= amount;
+            SavePlayerData();
             return true;
         }
         return false;
@@ -61,32 +68,41 @@ public class PlayerManager: MonoBehaviour
     }
 
     public void PrintInventory() {
-        foreach (var kvp in inventory) {
-            Debug.Log($"{kvp.Key} x{kvp.Value}");
+        foreach (var item in inventory) {
+            Debug.Log(item.Key + "x" + item.Value);
         }
     }
 
     // -------- Energy Methods --------
     public void AddEnergy(int amount) {
         energy = Mathf.Min(energy + amount, maxEnergy);
+        UpdateEnergyBar();
     }
 
     public bool UseEnergy(int amount) {
         if (energy >= amount) {
             energy -= amount;
+            UpdateEnergyBar();
             return true;
         }
         return false;
     }
 
+    public bool HasEnergy(int amount) {
+        return energy >= amount;
+    }
+
     private void CheckEnergyRegen() {
-        if (energy >= maxEnergy) return;
+        if (energy >= maxEnergy) {
+            lastRegenTime = DateTime.Now;
+            return;
+        }
 
         TimeSpan elapsed = DateTime.Now - lastRegenTime;
-        int minutesPassed = (int)elapsed.TotalMinutes;
+        int minutesPassed = (int)elapsed.TotalSeconds;
 
-        if (minutesPassed >= regenIntervalMinutes) {
-            int times = minutesPassed / regenIntervalMinutes;
+        if (minutesPassed >= regenIntervalSeconds) {
+            int times = minutesPassed / regenIntervalSeconds;
             int totalRegen = times * regenAmount;
 
             AddEnergy(totalRegen);
@@ -95,6 +111,14 @@ public class PlayerManager: MonoBehaviour
 
             Debug.Log($"Energy regenerated: +{totalRegen}, now {energy}/{maxEnergy}");
         }
+    }
+
+    public void UpdateEnergyBar() {
+        energyBar.maxValue = maxEnergy;
+        energyBar.value = energy;
+
+        energyText.text = energy + "/" + maxEnergy;
+        SavePlayerData();
     }
 
     // -------- Money Methods --------
@@ -147,15 +171,14 @@ public class PlayerManager: MonoBehaviour
         for (int i = 0; i < data.ingredientNames.Count; i++) {
             inventory[data.ingredientNames[i]] = data.ingredientAmounts[i];
         }
-
-        // regen ทันทีถ้าเวลาผ่านไปแล้ว
         CheckEnergyRegen();
+        UpdateEnergyBar();
 
         Debug.Log("PlayerData Loaded: " + json);
     }
 
     public void LoadDataFromTable() {
-        foreach(var item in inventoryData.items) {
+        foreach (var item in inventoryData.items) {
             inventory.Add(item.ingredient.ingredientName, item.amount);
         }
     }

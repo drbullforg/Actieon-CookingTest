@@ -44,10 +44,12 @@ public class RecipeManager: MonoBehaviour
 
     public void SetPage(List<RecipeItem> list) {
         Debug.Log("List Count : " + list.Count);
-
+        
         ClearViewer();
         double pageNum = Mathf.CeilToInt(1.0f * list.Count / groupOfContent);
         Debug.Log("page Num : " + pageNum);
+
+        if (pageNum == 0) return;
 
         for (int i = 0; i < pageNum; i++) {
             GameObject page = Instantiate(prefabPage, pageContent);
@@ -101,6 +103,10 @@ public class RecipeManager: MonoBehaviour
         return newListSearch;
     }
 
+    public RecipeItem GetRecipeFromName(string recipeName) {
+        return recipeItems.Find(x => x.recipeData.recipeName == recipeName);
+    }
+
     // ------ Cooking Management ------
     public bool CanCook(RecipeData recipe) {
         foreach (var ing in recipe.ingredientRequirement) {
@@ -110,14 +116,15 @@ public class RecipeManager: MonoBehaviour
         return true;
     }
 
-    public void CookRecipe(RecipeData recipe) {
-        if (CanCook(recipe)) {
-            foreach (var ing in recipe.ingredientRequirement) {
-                playerInventory.UseItem(ing.ingredient.ingredientName, ing.amount);
-            }
-            Debug.Log("Cooked: " + recipe.recipeName);
-        } else {
-            Debug.Log("Not enough ingredients for " + recipe.recipeName);
-        }
-    }
+    //public void CookRecipe(RecipeData recipe) {
+    //    if (CanCook(recipe)) {
+    //        foreach (var ing in recipe.ingredientRequirement) {
+    //            playerInventory.UseItem(ing.ingredient.ingredientName, ing.amount);
+    //        }
+    //        playerInventory.UseEnergy(recipe.energyCost);
+    //        Debug.Log("Cooked: " + recipe.recipeName);
+    //    } else {
+    //        Debug.Log("Not enough ingredients for " + recipe.recipeName);
+    //    }
+    //}
 }

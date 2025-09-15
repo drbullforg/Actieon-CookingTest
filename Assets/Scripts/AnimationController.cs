@@ -10,6 +10,7 @@ public class AnimationController : MonoBehaviour
 
     private void Awake() {
         animator = GetComponent<Animator>();
+        animator.keepAnimatorStateOnDisable = true;
     }
 
     public void PlayAnimation(int state) {
